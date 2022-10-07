@@ -39,7 +39,9 @@ export default class App extends React.Component{
   componentDidMount(){
 
   }
-
+  
+  //This is used as a function that is parsed to the game to change the Piece display component on piece change
+  //Currently there are issues with updating after pressing the left and right arrow instead of keys. The piece display doesnt update until the board has been hovered over
   changeVarFunc(p, r, s){
     console.log("Change Var Func Called");
     this.setState({
@@ -48,7 +50,8 @@ export default class App extends React.Component{
       score: s,
     });
   }
-
+  
+  //Updating site to show help menu
   setHelp(){
     this.setState({
       showHelp: "block",
@@ -58,7 +61,8 @@ export default class App extends React.Component{
       showThirdGame: "none"
     });
   }
-
+  
+  //Updating site to show game difficulty selection menu
   setMenu(){
     this.setState({
       showHelp: "none",
@@ -68,7 +72,8 @@ export default class App extends React.Component{
       showThirdGame: "none"
     });
   }
-
+  
+  //Updating website to show current game board
   setGame(){
     this.setState({
       showHelp: "none",
@@ -101,7 +106,9 @@ export default class App extends React.Component{
       });
     }
   }
-
+  
+  //Easy, normal and hard gamemodes change functions
+  //Game size relates to how many cells there are within the grid
   easy(){
     this.setState({
       showFirstGame: "block",
@@ -135,7 +142,7 @@ export default class App extends React.Component{
     });
   }
 
-
+  //Mobile view and Browser view are used because at the time i had limited knowledge of responsive sizing within react
   render(){
     return (
       <>
