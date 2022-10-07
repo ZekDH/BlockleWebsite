@@ -28,7 +28,8 @@ class Box extends React.Component{
     this.hoverFunc = this.hoverFunc.bind(this);
     this.hoverExit = this.hoverExit.bind(this);
   }
-
+  
+  //Click function to call external function from the game when icon is clicked
   clickFunc(){
 
     if(isMobile){
@@ -48,15 +49,19 @@ class Box extends React.Component{
   }
 
 
-
+  
+  //Calls function to game logic to display header outline
   hoverFunc(){
     this.props.placeFunc(this.props.yLoc, this.props.xLoc, true);
   }
-
+  
+  //Stops highlighting this piece
   hoverExit(){
     this.props.rejectFunc(this.props.yLoc, this.props.xLoc);
   }
-
+  
+  
+  //This props colour is used to update colour quickly within realtime
   render(){
     return (
       <button onClick={this.clickFunc} onMouseOver={this.hoverFunc} onMouseOut={this.hoverExit} style={this.props.colour}>
