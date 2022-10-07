@@ -55,27 +55,14 @@ export default class Game extends React.Component{
     this.rotateLeftCallback = this.rotateLeftCallback.bind(this);
     this.rotateRightCallback = this.rotateRightCallback.bind(this);
     this.updateCall = this.updateCall.bind(this);
-
+  
+    //Generation of daily seed to parse to the noise function so the generation updates daily
     let today = new Date();
     let day = (Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) - Date.UTC(today.getFullYear(), 0, 0)) / 24 / 60 / 60 / 1000;
     this.state.day = day;
     global.noise.seed(day);
-
-    // for(let y = 0; y < this.state.size; y++){
-    //   const row = [ ];
-    //   for(let x = 0; x < this.state.size; x++){
-    //     let dist = Math.sqrt(Math.pow(this.state.size/2 - x,2) + Math.pow(this.state.size/2 - y,2));
-    //     let perlinStack = global.noise.perlin2(x+100 / 10, y+100 / 10) - global.noise.perlin2(x / 10, y / 10);
-    //
-    //     if((dist + (perlinStack*2.6)) > this.state.size/2){
-    //       row.push(-1);
-    //     }else{
-    //       row.push(0);
-    //     }
-    //   }
-    //   this.state.numberBoard.push(row);
-    // }
-
+  
+    //Parsing the number values to the board to help with colouring of the pieces and collision detection
     for(let y = 0; y < this.state.size; y++){
       const row = [ ];
       for(let x = 0; x < this.state.size; x++){
@@ -84,21 +71,26 @@ export default class Game extends React.Component{
       this.state.numberBoard.push(row);
     }
 
+    //Checking storage for saved information on the game
+    //This is used to check if the blockle for the day has already been completed
     let storedDay = window.localStorage.getItem("BlockleGameDay" + String(this.state.size));
     let storedFinish = window.localStorage.getItem("BlockleGameFinishedToday" + String(this.state.size));
-
     if(String(storedDay) === String(this.state.day) && String(storedFinish) === String(true)){
       console.log("Render Storage Check")
       this.state.gameEnd = true;
       this.state.score = window.localStorage.getItem("BlockleGameScore" + String(this.state.size));
     }
-
+    
+    //Generating the board's HTML to display
     this.generateBoard();
+    
+    //Selecting the piece as the board is created from placing pieces then storing them to ensure it can always be completed by the user
     this.state.piece = this.state.placeOrder[0];
     const data = JSON.parse(window.localStorage.getItem("chart" + String(this.state.size)) || "[]");
     window.localStorage.setItem("chart" + String(this.state.size), JSON.stringify(data));
   }
-
+  
+  //Creating the HTML elements of the board and properly sizing the Boxes within the grid
   boardDisplay(){
     const Board = [ ];
 
@@ -123,7 +115,8 @@ export default class Game extends React.Component{
         const obj = <Box colour={boxStyle} xLoc={y} yLoc={x} id={this.state.numberBoard[y][x]} placeFunc={this.activatePlace} rejectFunc={this.rejectPlace} />
         row.push(obj);
       }
-
+      
+      //This is used to scale the rows correctly with the box size allowing for seamless grid generation
       let rowScale = (100/this.state.size).toString() + "%";
       Board.push(
         <div style={{display: "flex", justifyContent: "center", height: rowScale}}>
@@ -134,7 +127,8 @@ export default class Game extends React.Component{
 
     this.setState({ displayBoard: Board });
   }
-
+  
+  //This generates the board through placing pieces and storing them into an array for the player to use after the board is generated
   generateBoard(){
     let PiecesValue = 0;
     let boardPiecesPlaced = 0;
@@ -200,7 +194,9 @@ export default class Game extends React.Component{
     }
     this.state.placeOrder = placeSeq;
   }
-
+  
+  //Generate the piece to be placed within the generation algorithim
+  //Rotation and location are generated with the daily seed
   generatePiece(pieceType, pPlaced){
 
     var rng = new Math.seedrandom(this.state.day.toString() + pieceType.toString() + pPlaced.toString());
@@ -226,7 +222,6 @@ export default class Game extends React.Component{
     }else if(pieceType === 5 && rotationFound === true){
       rotationFound = this.placeZigZag(x, y, "#000000", false, true, rot, true);
     }
-
 
     return rotationFound;
   }
@@ -281,6 +276,8 @@ export default class Game extends React.Component{
     this.activatePlace(this.state.lastY, this.state.lastX, true);
   }
 
+  //Used to register location of the piece and display a tempoary piece on the board or to place a real piece
+  //Each Box within the grid can call this function upon click and hover
   activatePlace(y, x, temp){
     let newVal = this.state.placeOrder[this.state.piecesPlaced + 1];
     let piecePlaced = false;
@@ -359,7 +356,9 @@ export default class Game extends React.Component{
       this.scoreCheck();
      }
   }
+  
 
+  //Places an invisible piece on each possible area within the board with all possible rotations to see if the user is still able to play the game
   checkFinish(inputPiece){
     let Sum = 0;
     let TotalLocations = 0;
@@ -592,7 +591,8 @@ export default class Game extends React.Component{
       return false
     }
   }
-
+  
+  //Collision checking and returning an error instead of highlighting or placing invalid pieces within grid generation
   generatePlace(x, y, dir, colour, temp, check){
     const tempNum = this.state.numberBoard;
     let errorFound = false;
@@ -621,7 +621,9 @@ export default class Game extends React.Component{
 
     return errorFound;
   }
-
+  
+  //Place call that places the piece and checks for collison within the video game
+  //Reject place at the start clears the board before placement to ensure that multiple temp pieces arent being shown on the board at once
   place(x, y, dir, colour, temp, check){
     this.rejectPlace(y, x);
     const tempNum = this.state.numberBoard;
@@ -674,7 +676,8 @@ export default class Game extends React.Component{
     if(temp === true){  return true;  }
     return errorFound;
   }
-
+  
+  //Resetting the board based off the number to ensure tempoary pieces dont stay upon update
   rejectPlace(y, x){
     const newColArray = this.state.colourBoard;
 
@@ -692,7 +695,8 @@ export default class Game extends React.Component{
       colourBoard: newColArray
     });
   }
-
+  
+  //function to return final score of user
   scoreCheck(){
     let Sum = 0;
     let Total = 0;
@@ -714,7 +718,8 @@ export default class Game extends React.Component{
     this.updateCall();
     return (Sum/Total).toFixed(2);
   }
-
+  
+  //Copys the game infomration to allow people to easily share their results
   clipboardCopy(){
     if(this.state.size === 7){
       navigator.clipboard.writeText(
@@ -752,7 +757,8 @@ export default class Game extends React.Component{
     this.rejectPlace(this.state.lastY, this.state.lastX);
     this.activatePlace(this.state.lastY, this.state.lastX, true);
   }
-
+  
+  //Keypress checks for left and right keys which then calls the rotate functions
   handleKeyPress(e){
     if(this.props.active === "none"){ return; }
     if(e.keyCode === 39 || e.keyCode === 68){
@@ -763,7 +769,8 @@ export default class Game extends React.Component{
       this.rotateLeftCallback();
     }
   }
-
+  
+  //Creating information to display on game start and registering and event listener for the keypresses
   componentDidMount(){
     document.addEventListener('keydown', this.handleKeyPress);
     this.createColourBoard();
@@ -793,11 +800,13 @@ export default class Game extends React.Component{
       }
     }
   }
-
+  
+  //Removing the event listener when this component is deactivated 
   componentWillUnmount() {
     document.removeEventListener('keydown', this.handleKeyPress);
   }
-
+    
+  //Display the results of the game or the game itself based off whether the user has completed the game for the day
   render(){
     let gameBox = "";
     let finishBox = "";
