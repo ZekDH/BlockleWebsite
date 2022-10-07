@@ -30,9 +30,9 @@ export default class PieceDisplay extends React.Component {
     this.placeLeftElbow = this.placeLeftElbow.bind(this);
     this.placeRightElbow = this.placeRightElbow.bind(this);
   }
-
+  
+  //Resetting the colours within the display to the default grey as if a piece did not exist within it
   colourReset(){
-
     const Board = this.state.colourArray;
     for(let x = 0; x < this.state.size; x++){
       const row = [];
@@ -46,17 +46,17 @@ export default class PieceDisplay extends React.Component {
       //console.log(this.state.colourArray[0][0] + " it worksss");
     });
   }
-
+  
+  //Initialization for colouring the board to default
   colourBoard(){
-
     for(let x = 0; x < this.state.size; x++){
       for(let y = 0; y < this.state.size; y++){
         this.state.colourArray[x][y]= "#ffffff99";
       }
-
     }
   }
-
+  
+  //Creating the HTML element of the board
   displayBoard(){
     const Board = [];
     for(let x = 0; x < this.state.size; x++){
@@ -84,7 +84,8 @@ export default class PieceDisplay extends React.Component {
       //console.log("Display Board Set");
     });
   }
-
+  
+  //Start function to initialize the board when the component is created
   componentDidMount(){
     this.colourReset();
 
@@ -92,7 +93,8 @@ export default class PieceDisplay extends React.Component {
       rotation: this.props.rot,
       piece: this.props.piece
     });
-
+  
+    //Displaying what the current piece is based off information parsed in props
     if(this.state.piece === 0){ this.placeSquare("#eb1d13", this.state.rotation);  }
     if(this.state.piece === 1){ this.placeJunction("#08c51c", this.state.rotation);  }
     if(this.state.piece === 2){ this.placeRightElbow("#7a04f0", this.state.rotation);  }
@@ -101,6 +103,9 @@ export default class PieceDisplay extends React.Component {
     if(this.state.piece === 5){ this.placeZigZag("#e115a9", this.state.rotation);  }
 
   }
+
+  //All place functions need less code within them because i do not need to check for collision
+  //Additionally the piece is always created at the center
 
   placeSquare(col, rotation){
     let rot = rotation;
@@ -233,6 +238,9 @@ export default class PieceDisplay extends React.Component {
 
     this.place(dir, col);
   }
+  
+  //Main place function after the piece size and rotation is parsed into the function
+  //Saves code space by using this within a function
 
   place(dir, colour){
     const colBoard = this.state.colourArray;
@@ -245,7 +253,9 @@ export default class PieceDisplay extends React.Component {
     this.setState({ colourArray: colBoard }, () => {});
     this.displayBoard();
   }
-
+  
+  //Displaying the piece board
+  //Pieces are updated within render to help minimize lag between selecting pieces
   render() {
     if(this.props.rot !== this.state.rotation || this.props.piece !== this.state.piece){
       this.colourBoard();
